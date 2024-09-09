@@ -1,11 +1,13 @@
 package invoice_https
 
 import (
+	"fmt"
 	"go-invoice/domain"
 	invoice_usecase "go-invoice/internal/invoice/usecase"
 	"go-invoice/security"
 	"go-invoice/util"
 	"go-invoice/worker"
+	"net/http"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -18,6 +20,7 @@ type InvoiceHandler interface {
 	FetchInvoices(ctx *gin.Context)
 	FetchInvoiceWithItems(ctx *gin.Context)
 	FetchInvoiceStats(ctx *gin.Context)
+	DownloadInvoicePdf(ctx *gin.Context)
 }
 
 type invoiceHandler struct {
@@ -110,4 +113,17 @@ func (ch *invoiceHandler) FetchInvoiceStats(ctx *gin.Context) {
 
 func NewInvoiceHandlers(usecase invoice_usecase.InvoiceUsecase) InvoiceHandler {
 	return &invoiceHandler{usecase: usecase}
+}
+
+func (ch *invoiceHandler) DownloadInvoicePdf(ctx *gin.Context) {
+	// authPayload := security.GetAuthsPayload(ctx)
+	// payload := util.GetUrlParams[domain.IDParamPayload](ctx)
+	resp, err := ch.usecase.GenerateInvoicePDF()
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	fileName := "account statement " + fmt.Sprintf("%d", time.Now().UnixNano()) + ".pdf"
+	ctx.Header("Content-Disposition", fmt.Sprintf("attachment; filename=%s", fileName))
+	ctx.Data(http.StatusOK, "application/pdf", resp)
 }

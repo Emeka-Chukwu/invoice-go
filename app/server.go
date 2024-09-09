@@ -46,10 +46,6 @@ func NewServer(config util.Config, conn *sql.DB, taskDistributor worker.TaskDist
 	return server, nil
 }
 
-func errorrResponse(err error) gin.H {
-	return gin.H{"error": err.Error()}
-}
-
 func (server *Server) Start(address string) error {
 	return server.router.Run(address)
 }
@@ -75,6 +71,9 @@ func (server *Server) setupRouter() {
 	authRepo := auth_repository.NewAuthRepository(server.conn)
 	authusecase := auth_usecase.NewAuthUsecase(authRepo, server.tokenMaker, server.config)
 	auth_http.NewAuthRoutes(groupRouter, authusecase)
+
+	//////middleware
+	// groupRouter.Use(middleware.AuthMiddleware(server.tokenMaker))
 
 	//////activity
 	activityRepo := activitylog_repository.NewAuthRepository(server.conn)

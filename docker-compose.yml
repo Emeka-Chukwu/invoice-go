@@ -8,7 +8,7 @@ services:
     environment:
       - POSTGRES_USER=admin
       - POSTGRES_PASSWORD=password
-      - POSTGRES_DB=invoice-go
+      - POSTGRES_DB=invoice
     ports:
       - 5432:5432
     volumes:

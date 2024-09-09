@@ -16,10 +16,16 @@ type InvoiceUsecase interface {
 	DeleteInvoiceItems(itemIds []int) (int, error)
 	FetchInvoiceStats(userId int) (int, map[string]domain.InvoiceStats, error)
 	GetPagination(payload domain.PaginationDTO) domain.PaginationDTO
+	GenerateInvoicePDF() ([]byte, error)
 }
 
 type invoiceUsecase struct {
 	Repo invoice_repository.InvoiceRepository
+}
+
+// GenerateInvoicePDF implements InvoiceUsecase.
+func (i *invoiceUsecase) GenerateInvoicePDF() ([]byte, error) {
+	panic("unimplemented")
 }
 
 // CreateInvoiceWithItems implements InvoiceUsecase.

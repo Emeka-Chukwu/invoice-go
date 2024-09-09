@@ -1,10 +1,10 @@
-DB_URL=postgresql://admin:password@localhost:5432/invoice-go?sslmode=disable
+DB_URL=postgresql://admin:password@localhost:5432/invoice?sslmode=disable
 
 createdb:
-	docker exec -it postgresql createdb --username=admin --owner=admin invoice-go
+	docker exec -it postgresql createdb --username=admin --owner=admin invoice
 
 dropdb:
-	docker exec -it postgresql dropdb invoice-go
+	docker exec -it postgresql dropdb invoice
 
 migrateup:
 	migrate -path migration -database "$(DB_URL)" -verbose up
