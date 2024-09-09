@@ -15,4 +15,5 @@ func NewInvoiceRoutes(router *gin.RouterGroup, usecase invoice_usecase.InvoiceUs
 	route.GET("/invoices/:id", invoiceHandler.FetchInvoiceWithItems)
 	route.GET("/invoices/stats", invoiceHandler.FetchInvoiceStats)
 	route.GET("/download", invoiceHandler.DownloadInvoicePdf)
+	route.PUT("/update/:id", invoiceHandler.UpdateInvoiceStatus)
 }

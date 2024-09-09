@@ -19,6 +19,7 @@ type InvoiceRepository interface {
 	FetchInvoiceWithItems(invoiceId int) (domain.InvoiceResponse, error)
 	DeleteInvoiceItems(itemIds []int) error
 	FetchInvoiceStats(userId int) (map[string]domain.InvoiceStats, error)
+	UpdateInvoiceStatus(id int, userID int, newStatus string) error
 }
 
 func NewInvoiceWithItems(Db *sql.DB) InvoiceRepository {
@@ -234,4 +235,19 @@ func (a *invoiceRepository) FetchInvoiceStats(userId int) (map[string]domain.Inv
 		statsMap[strings.ToLower(stat.Status)] = stat
 	}
 	return statsMap, err
+}
+
+func (ir *invoiceRepository) UpdateInvoiceStatus(id int, userID int, newStatus string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), util.DbTimeout)
+	defer cancel()
+	query := `
+        UPDATE invoices
+        SET status = $1, updated_at = CURRENT_TIMESTAMP
+        WHERE id = $2 AND user_id = $3;
+    `
+	_, err := ir.Db.ExecContext(ctx, query, newStatus, id, userID)
+	if err != nil {
+		return err
+	}
+	return nil
 }

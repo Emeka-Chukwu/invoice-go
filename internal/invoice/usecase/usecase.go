@@ -17,6 +17,7 @@ type InvoiceUsecase interface {
 	FetchInvoiceStats(userId int) (int, map[string]domain.InvoiceStats, error)
 	GetPagination(payload domain.PaginationDTO) domain.PaginationDTO
 	GenerateInvoicePDF() ([]byte, error)
+	UpdateInvoiceStatus(status string, id, userId int) (int, error)
 }
 
 type invoiceUsecase struct {
@@ -105,4 +106,14 @@ func (i invoiceUsecase) GetPagination(payload domain.PaginationDTO) domain.Pagin
 	}
 	page = (page - 1) * limit
 	return domain.PaginationDTO{Limit: limit, Page: page}
+}
+
+func (i invoiceUsecase) UpdateInvoiceStatus(status string, id, userId int) (int, error) {
+	err := i.Repo.UpdateInvoiceStatus(id, userId, status)
+	if err == sql.ErrNoRows {
+		return http.StatusNotFound, err
+	} else if err != nil {
+		return http.StatusInternalServerError, err
+	}
+	return http.StatusOK, nil
 }

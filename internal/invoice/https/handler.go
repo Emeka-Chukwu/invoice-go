@@ -21,6 +21,7 @@ type InvoiceHandler interface {
 	FetchInvoiceWithItems(ctx *gin.Context)
 	FetchInvoiceStats(ctx *gin.Context)
 	DownloadInvoicePdf(ctx *gin.Context)
+	UpdateInvoiceStatus(ctx *gin.Context)
 }
 
 type invoiceHandler struct {
@@ -126,4 +127,26 @@ func (ch *invoiceHandler) DownloadInvoicePdf(ctx *gin.Context) {
 	fileName := "account statement " + fmt.Sprintf("%d", time.Now().UnixNano()) + ".pdf"
 	ctx.Header("Content-Disposition", fmt.Sprintf("attachment; filename=%s", fileName))
 	ctx.Data(http.StatusOK, "application/pdf", resp)
+}
+
+func (ch *invoiceHandler) UpdateInvoiceStatus(ctx *gin.Context) {
+	authPayload := security.GetAuthsPayload(ctx)
+	payload := util.GetUrlParams[domain.IDParamPayload](ctx)
+	status, err := ch.usecase.UpdateInvoiceStatus("paid", payload.ID, authPayload.UserId)
+	if err != nil {
+		ctx.JSON(status, gin.H{"error": err.Error()})
+		return
+	}
+	taskPayload := &domain.CreateActivityDTO{
+		UserID:     authPayload.UserId,
+		Action:     "You have manually confirmed the payment",
+		EntityType: "Invoice",
+	}
+	opts := []asynq.Option{
+		asynq.MaxRetry(10),
+		asynq.ProcessIn(10 * time.Second),
+		asynq.Queue(worker.QueueCritical),
+	}
+	ch.Worker.DistributeActivityLog(ctx, taskPayload, opts...)
+	ctx.JSON(status, gin.H{"data": "Manual Payment confirmed"})
 }
