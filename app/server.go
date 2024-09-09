@@ -3,6 +3,21 @@ package app
 import (
 	"database/sql"
 	"fmt"
+	activity_http "go-invoice/internal/activitylog/http"
+	activitylog_repository "go-invoice/internal/activitylog/repository"
+	activity_usecase "go-invoice/internal/activitylog/usecase"
+	auth_http "go-invoice/internal/auths/http"
+	auth_repository "go-invoice/internal/auths/repository"
+	auth_usecase "go-invoice/internal/auths/usecase"
+	bankinfo_http "go-invoice/internal/bank_info/http"
+	bankinfo_repository "go-invoice/internal/bank_info/repository"
+	bankinfo_usecase "go-invoice/internal/bank_info/usecase"
+	customer_http "go-invoice/internal/customer/http"
+	customer_repository "go-invoice/internal/customer/repository"
+	customer_usecase "go-invoice/internal/customer/usecase"
+	invoice_https "go-invoice/internal/invoice/https"
+	invoice_repository "go-invoice/internal/invoice/repository"
+	invoice_usecase "go-invoice/internal/invoice/usecase"
 	"go-invoice/security"
 	"go-invoice/util"
 	"go-invoice/worker"
@@ -46,7 +61,7 @@ func (server *Server) setupRouter() {
 			"message": fmt.Sprintf("Personal Budget app ruuning at %s", server.config.HTTPServerAddress),
 		})
 	})
-	// groupRouter := router.Group("/api/v1")
+	groupRouter := router.Group("/api/v1")
 
 	router.NoRoute(func(c *gin.Context) {
 		c.JSON(http.StatusNotFound, gin.H{
@@ -56,10 +71,30 @@ func (server *Server) setupRouter() {
 		})
 	})
 
-	// //////user
-	// userRepo := repositories_users.NewUserAuths(server.conn)
-	// userCase := usecase_user.NewUsecaseUser(server.config, server.tokenMaker, userRepo)
-	// users_v1.NewUserRoutes(groupRouter, userCase)
+	//////auths
+	authRepo := auth_repository.NewAuthRepository(server.conn)
+	authusecase := auth_usecase.NewAuthUsecase(authRepo, server.tokenMaker, server.config)
+	auth_http.NewAuthRoutes(groupRouter, authusecase)
+
+	//////activity
+	activityRepo := activitylog_repository.NewAuthRepository(server.conn)
+	activityusecase := activity_usecase.NewActivityUsecase(activityRepo)
+	activity_http.NewActivityRoutes(groupRouter, activityusecase)
+
+	//////bank
+	bankRepo := bankinfo_repository.NewBankInfoRepository(server.conn)
+	bankusecase := bankinfo_usecase.NewBankInfoUsecase(bankRepo)
+	bankinfo_http.NewBankInfoRoutes(groupRouter, bankusecase)
+
+	//////customer
+	customerRepo := customer_repository.NewCustomerRepository(server.conn)
+	customerusecase := customer_usecase.NewCustomerUsecase(customerRepo)
+	customer_http.NewCustomerRoutes(groupRouter, customerusecase)
+
+	//////invoices
+	invoiceRepo := invoice_repository.NewInvoiceWithItems(server.conn)
+	invoiceusecase := invoice_usecase.NewInvoiceUsecase(invoiceRepo)
+	invoice_https.NewInvoiceRoutes(groupRouter, invoiceusecase)
 
 	server.router = router
 }

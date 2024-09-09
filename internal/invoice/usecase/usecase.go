@@ -79,7 +79,7 @@ func (i invoiceUsecase) FetchInvoicesWithItems(userId int, limit int64, offset i
 }
 
 func NewInvoiceUsecase(Repo invoice_repository.InvoiceRepository) InvoiceUsecase {
-	return invoiceUsecase{Repo: Repo}
+	return &invoiceUsecase{Repo: Repo}
 }
 
 type QueryParams struct {
