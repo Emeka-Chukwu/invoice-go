@@ -36,6 +36,10 @@ down:
 # 	mockgen -package mockdb -destination db/mock/store.go github.com/techschool/simplebank/db/sqlc Store
 # 	mockgen -package mockwk -destination worker/mock/distributor.go github.com/techschool/simplebank/worker TaskDistributor
 
-
+mock:
+	mockgen -package mockAuth -destination internal/auths/usecase/mock/store.go go-invoice/internal/auths/repository AuthRepository 
+	mockgen -package mockAuthUse -destination internal/auths/http/mock/store.go go-invoice/internal/auths/usecase AuthUsecase 
 
 .PHONY: network postgres createdb dropdb migrateup migratedown migrateup1 migratedown1 new_migration test server mock
+
+# AuthUsecase

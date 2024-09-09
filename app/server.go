@@ -27,9 +27,9 @@ import (
 )
 
 type Server struct {
-	config          util.Config
+	Config          util.Config
 	conn            *sql.DB
-	router          *gin.Engine
+	Router          *gin.Engine
 	tokenMaker      security.Maker
 	taskDistributor worker.TaskDistributor
 }
@@ -41,20 +41,20 @@ func NewServer(config util.Config, conn *sql.DB, taskDistributor worker.TaskDist
 	if err != nil {
 		return nil, fmt.Errorf("cannot create initiating security: %w", err)
 	}
-	server := &Server{tokenMaker: tokenMaker, config: config, conn: conn, taskDistributor: taskDistributor}
+	server := &Server{tokenMaker: tokenMaker, Config: config, conn: conn, taskDistributor: taskDistributor}
 	server.setupRouter()
 	return server, nil
 }
 
 func (server *Server) Start(address string) error {
-	return server.router.Run(address)
+	return server.Router.Run(address)
 }
 
 func (server *Server) setupRouter() {
 	router := gin.Default()
 	router.GET("/", func(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, gin.H{
-			"message": fmt.Sprintf("Personal Budget app ruuning at %s", server.config.HTTPServerAddress),
+			"message": fmt.Sprintf("Personal Budget app ruuning at %s", server.Config.HTTPServerAddress),
 		})
 	})
 	groupRouter := router.Group("/api/v1")
@@ -69,7 +69,7 @@ func (server *Server) setupRouter() {
 
 	//////auths
 	authRepo := auth_repository.NewAuthRepository(server.conn)
-	authusecase := auth_usecase.NewAuthUsecase(authRepo, server.tokenMaker, server.config)
+	authusecase := auth_usecase.NewAuthUsecase(authRepo, server.tokenMaker, server.Config)
 	auth_http.NewAuthRoutes(groupRouter, authusecase)
 
 	//////middleware
@@ -95,5 +95,5 @@ func (server *Server) setupRouter() {
 	invoiceusecase := invoice_usecase.NewInvoiceUsecase(invoiceRepo)
 	invoice_https.NewInvoiceRoutes(groupRouter, invoiceusecase)
 
-	server.router = router
+	server.Router = router
 }

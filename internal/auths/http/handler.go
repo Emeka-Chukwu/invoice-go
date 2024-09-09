@@ -1,6 +1,7 @@
 package auth_http
 
 import (
+	"fmt"
 	"go-invoice/domain"
 	auth_usecase "go-invoice/internal/auths/usecase"
 	"go-invoice/util"
@@ -43,7 +44,9 @@ func (ah authsHandler) LoginUser(ctx *gin.Context) {
 // RegisterUser implements AuthsHandler.
 func (ah authsHandler) RegisterUser(ctx *gin.Context) {
 	payload := util.GetBody[domain.CreateUserRequestDto](ctx)
+	fmt.Println(payload)
 	status, resp, err := ah.authusecase.CreateUser(payload)
+	fmt.Println(resp)
 	if err != nil {
 		ctx.JSON(status, gin.H{"error": err.Error()})
 		return

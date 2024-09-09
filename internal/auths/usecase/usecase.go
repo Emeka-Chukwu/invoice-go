@@ -2,6 +2,7 @@ package auth_usecase
 
 import (
 	"database/sql"
+	"fmt"
 	"go-invoice/domain"
 	auth_repository "go-invoice/internal/auths/repository"
 	"go-invoice/security"
@@ -32,10 +33,12 @@ func (au authUsecase) CreateUser(req domain.CreateUserRequestDto) (int, gin.H, e
 	req.Password = hashedPassword
 	user, err := au.Repo.CreateUser(req)
 	if err != nil {
+		fmt.Println(err)
 		return http.StatusInternalServerError, gin.H{}, err
 	}
 	token, payload, err := au.Security.CreateToken(user.Id, au.config.AccessTokenDuration, true)
 	if err != nil {
+		fmt.Println(err)
 		return http.StatusInternalServerError, gin.H{}, err
 	}
 	return http.StatusCreated, gin.H{"data": user, "token": token, "token_payload": payload}, nil
