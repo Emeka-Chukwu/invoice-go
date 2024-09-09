@@ -55,7 +55,7 @@ func (iR *invoiceRepository) CreateInvoiceWithItems(req domain.CreateInvoiceRequ
 	if err != nil {
 		return 0, err
 	}
-	return 0, nil
+	return invoiceID, nil
 }
 
 func (ir invoiceRepository) FetchInvoicesWithItems(userId int, limit, offset int64) ([]domain.InvoiceResponse, error) {

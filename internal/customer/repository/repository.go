@@ -21,7 +21,7 @@ func (cr *customerRepository) CreateCustomer(req domain.CustomerDTO) (int64, err
 	defer cancel()
 	query := `
     INSERT INTO customers (user_id, name, email, phone, created_at, updated_at) 
-    VALUES ($1, $2, $3,$4,  CURRENT_TIMESTAMP, CURRENT_TIMESTAMP) 
+    VALUES ($1, $2, $3, $4,  CURRENT_TIMESTAMP, CURRENT_TIMESTAMP) 
     RETURNING id`
 
 	var id int64
@@ -35,7 +35,7 @@ func (cr *customerRepository) CreateCustomer(req domain.CustomerDTO) (int64, err
 func (cr *customerRepository) FetchCustomersByUserId(userId int) ([]domain.CustomerResponse, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), util.DbTimeout)
 	defer cancel()
-	query := `SELECT id, user_id, name, email,phone, created_at, updated_at 
+	query := `SELECT id, user_id, name, email, phone, created_at, updated_at 
               FROM customers WHERE user_id = $1 ORDER BY created_at DESC`
 	rows, err := cr.Db.QueryContext(ctx, query, userId)
 	if err != nil {

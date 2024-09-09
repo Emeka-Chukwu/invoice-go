@@ -18,7 +18,7 @@ func (a *authRepository) CreateUser(req domain.CreateUserRequestDto) (domain.Use
 	returning id, email, first_name, last_name, created_at, updated_at`
 	var response domain.UserReponse
 	err := a.Db.QueryRowContext(ctx, stmt, req.Email, req.FirstName, req.LastName, req.Password).
-		Scan(&response.Id, &response.Email, &response.FirstName, &response.LastName, &response.Password, &response.CreatedAt, &response.UpdatedAt)
+		Scan(&response.Id, &response.Email, &response.FirstName, &response.LastName, &response.CreatedAt, &response.UpdatedAt)
 	return response, err
 }
 

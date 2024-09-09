@@ -31,6 +31,11 @@ func (i *invoiceUsecase) GenerateInvoicePDF() ([]byte, error) {
 
 // CreateInvoiceWithItems implements InvoiceUsecase.
 func (i invoiceUsecase) CreateInvoiceWithItems(req domain.CreateInvoiceRequestDTO) (int, int, error) {
+	var totalAmount float64 = 0
+	for _, item := range req.CreateInvoiceItem {
+		totalAmount += item.UnitPrice * float64(item.Quantity)
+	}
+	req.TotalAmount = totalAmount
 	resp, err := i.Repo.CreateInvoiceWithItems(req)
 	if err != nil {
 		return http.StatusInternalServerError, resp, err
