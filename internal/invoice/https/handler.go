@@ -54,7 +54,6 @@ func (ch *invoiceHandler) CreateInvoice(ctx *gin.Context) {
 	ctx.JSON(status, gin.H{"data": resp})
 }
 
-// FetchInvoicesWithItems(userId int, limit, offset int64) (int, []domain.InvoiceResponse, error)
 func (ch *invoiceHandler) FetchInvoicesWithItems(ctx *gin.Context) {
 	authPayload := security.GetAuthsPayload(ctx)
 	payload := util.GetUrlQueryParams[domain.PaginationDTO](ctx)
@@ -66,11 +65,6 @@ func (ch *invoiceHandler) FetchInvoicesWithItems(ctx *gin.Context) {
 	}
 	ctx.JSON(status, gin.H{"data": resp})
 }
-
-// FetchInvoices(userId int, page, limit int64) (int, []domain.InvoiceResponse, error)
-// FetchInvoiceWithItems(invoiceId int) (int, domain.InvoiceResponse, error)
-// DeleteInvoiceItems(itemIds []int) (int, error)
-// FetchInvoiceStats(userId int) (int, map[string]domain.InvoiceStats, error)
 
 func (ch *invoiceHandler) FetchInvoices(ctx *gin.Context) {
 	authPayload := security.GetAuthsPayload(ctx)
@@ -84,10 +78,6 @@ func (ch *invoiceHandler) FetchInvoices(ctx *gin.Context) {
 	ctx.JSON(status, gin.H{"data": resp})
 }
 
-// FetchInvoiceWithItems(invoiceId int) (int, domain.InvoiceResponse, error)
-// DeleteInvoiceItems(itemIds []int) (int, error)
-// FetchInvoiceStats(userId int) (int, map[string]domain.InvoiceStats, error)
-
 func (ch *invoiceHandler) FetchInvoiceWithItems(ctx *gin.Context) {
 	authPayload := security.GetAuthsPayload(ctx)
 	payload := util.GetUrlParams[domain.IDParamPayload](ctx)
@@ -99,9 +89,6 @@ func (ch *invoiceHandler) FetchInvoiceWithItems(ctx *gin.Context) {
 	ctx.JSON(status, gin.H{"data": resp})
 }
 
-// DeleteInvoiceItems(itemIds []int) (int, error)
-// FetchInvoiceStats(userId int) (int, map[string]domain.InvoiceStats, error)
-
 func (ch *invoiceHandler) FetchInvoiceStats(ctx *gin.Context) {
 	authPayload := security.GetAuthsPayload(ctx)
 	status, resp, err := ch.usecase.FetchInvoiceStats(authPayload.UserId)
@@ -112,13 +99,11 @@ func (ch *invoiceHandler) FetchInvoiceStats(ctx *gin.Context) {
 	ctx.JSON(status, gin.H{"data": resp})
 }
 
-func NewInvoiceHandlers(usecase invoice_usecase.InvoiceUsecase) InvoiceHandler {
-	return &invoiceHandler{usecase: usecase}
+func NewInvoiceHandlers(usecase invoice_usecase.InvoiceUsecase, Worker worker.TaskDistributor) InvoiceHandler {
+	return &invoiceHandler{usecase: usecase, Worker: Worker}
 }
 
 func (ch *invoiceHandler) DownloadInvoicePdf(ctx *gin.Context) {
-	// authPayload := security.GetAuthsPayload(ctx)
-	// payload := util.GetUrlParams[domain.IDParamPayload](ctx)
 	resp, err := ch.usecase.GenerateInvoicePDF()
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})

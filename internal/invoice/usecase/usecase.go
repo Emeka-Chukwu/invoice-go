@@ -40,7 +40,7 @@ func (i invoiceUsecase) CreateInvoiceWithItems(req domain.CreateInvoiceRequestDT
 	if err != nil {
 		return http.StatusInternalServerError, resp, err
 	}
-	return http.StatusOK, resp, nil
+	return http.StatusCreated, resp, nil
 }
 
 // DeleteInvoiceItems implements InvoiceUsecase.

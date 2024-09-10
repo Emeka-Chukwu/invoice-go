@@ -18,6 +18,7 @@ import (
 	invoice_https "go-invoice/internal/invoice/https"
 	invoice_repository "go-invoice/internal/invoice/repository"
 	invoice_usecase "go-invoice/internal/invoice/usecase"
+	"go-invoice/middleware"
 	"go-invoice/security"
 	"go-invoice/util"
 	"go-invoice/worker"
@@ -30,7 +31,7 @@ type Server struct {
 	Config          util.Config
 	conn            *sql.DB
 	Router          *gin.Engine
-	tokenMaker      security.Maker
+	TokenMaker      security.Maker
 	taskDistributor worker.TaskDistributor
 }
 
@@ -41,7 +42,7 @@ func NewServer(config util.Config, conn *sql.DB, taskDistributor worker.TaskDist
 	if err != nil {
 		return nil, fmt.Errorf("cannot create initiating security: %w", err)
 	}
-	server := &Server{tokenMaker: tokenMaker, Config: config, conn: conn, taskDistributor: taskDistributor}
+	server := &Server{TokenMaker: tokenMaker, Config: config, conn: conn, taskDistributor: taskDistributor}
 	server.setupRouter()
 	return server, nil
 }
@@ -69,11 +70,11 @@ func (server *Server) setupRouter() {
 
 	//////auths
 	authRepo := auth_repository.NewAuthRepository(server.conn)
-	authusecase := auth_usecase.NewAuthUsecase(authRepo, server.tokenMaker, server.Config)
+	authusecase := auth_usecase.NewAuthUsecase(authRepo, server.TokenMaker, server.Config)
 	auth_http.NewAuthRoutes(groupRouter, authusecase)
 
 	//////middleware
-	// groupRouter.Use(middleware.AuthMiddleware(server.tokenMaker))
+	groupRouter.Use(middleware.AuthMiddleware(server.TokenMaker))
 
 	//////activity
 	activityRepo := activitylog_repository.NewAuthRepository(server.conn)
@@ -93,7 +94,7 @@ func (server *Server) setupRouter() {
 	//////invoices
 	invoiceRepo := invoice_repository.NewInvoiceWithItems(server.conn)
 	invoiceusecase := invoice_usecase.NewInvoiceUsecase(invoiceRepo)
-	invoice_https.NewInvoiceRoutes(groupRouter, invoiceusecase)
+	invoice_https.NewInvoiceRoutes(groupRouter, invoiceusecase, server.taskDistributor)
 
 	server.Router = router
 }

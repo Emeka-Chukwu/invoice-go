@@ -33,25 +33,6 @@ func newTestServer(t *testing.T, store auth_usecase.AuthUsecase) *app.Server {
 	return server
 }
 
-// func TestMain(m *testing.M) {
-// 	gin.SetMode(gin.TestMode)
-// 	os.Exit(m.Run())
-// }
-
-// func newTestServers(t *testing.T, store *gorm.DB, usecase user_services.AccountUsecase) *serverpkg.Server {
-// 	config := util.Config{
-// 		TokenSymmetricKey:   util.RandomString(32),
-// 		AccessTokenDuration: time.Minute,
-// 	}
-// 	server, err := serverpkg.NewServer(config, store)
-// 	err = SetupRouter(server, usecase)
-// 	if err != nil {
-// 		return &serverpkg.Server{}
-// 	}
-// 	require.NoError(t, err)
-// 	return server
-// }
-
 func TestMain(m *testing.M) {
 	gin.SetMode(gin.TestMode)
 	os.Exit(m.Run())
