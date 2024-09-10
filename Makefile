@@ -39,6 +39,5 @@ mock:
 	mockgen -package mockInvoice -destination internal/invoice/repository/mock/store.go go-invoice/internal/invoice/repository InvoiceRepository
 	mockgen -package mockInvoiceUse -destination internal/invoice/usecase/mock/store.go go-invoice/internal/invoice/usecase InvoiceUsecase  
 
-.PHONY: network postgres createdb dropdb migrateup migratedown migrateup1 migratedown1 new_migration test server mock
+.PHONY: network postgres createdb dropdb migrateup migratedown new_migration test server mock
 
-# AuthUsecase
