@@ -93,7 +93,7 @@ func (server *Server) setupRouter() {
 
 	//////invoices
 	invoiceRepo := invoice_repository.NewInvoiceWithItems(server.conn)
-	invoiceusecase := invoice_usecase.NewInvoiceUsecase(invoiceRepo)
+	invoiceusecase := invoice_usecase.NewInvoiceUsecase(invoiceRepo, customerRepo, bankRepo)
 	invoice_https.NewInvoiceRoutes(groupRouter, invoiceusecase, server.taskDistributor)
 
 	server.Router = router

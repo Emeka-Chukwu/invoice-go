@@ -100,8 +100,10 @@ func (i invoiceUsecase) FetchInvoicesWithItems(userId int, limit int64, offset i
 	return http.StatusOK, resp, nil
 }
 
-func NewInvoiceUsecase(Repo invoice_repository.InvoiceRepository) InvoiceUsecase {
-	return &invoiceUsecase{Repo: Repo}
+func NewInvoiceUsecase(Repo invoice_repository.InvoiceRepository,
+	RepoCustomer customer_repository.CustomerRepository,
+	RepoBank bankinfo_repository.BankInfoRepository) InvoiceUsecase {
+	return &invoiceUsecase{Repo: Repo, RepoCustomer: RepoCustomer, RepoBank: RepoBank}
 }
 
 type QueryParams struct {
