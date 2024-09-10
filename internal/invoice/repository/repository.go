@@ -43,8 +43,8 @@ func (iR *invoiceRepository) CreateInvoiceWithItems(req domain.CreateInvoiceRequ
 	}
 	for _, item := range req.CreateInvoiceItem {
 		_, err = tx.Exec(`
-            INSERT INTO invoice_items (invoice_id, description, quantity, unit_price) 
-            VALUES ($1, $2, $3, $4)`,
+            INSERT INTO invoice_items (invoice_id, title, description, quantity, unit_price) 
+            VALUES ($1, $2, $3, $4, $5)`,
 			invoiceID, item.Description, item.Quantity, item.UnitPrice)
 		if err != nil {
 			tx.Rollback()

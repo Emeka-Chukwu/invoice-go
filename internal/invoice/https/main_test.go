@@ -73,7 +73,7 @@ func NewInvoiceHandlers(router *gin.RouterGroup, store invoice_usecase.InvoiceUs
 	route.GET("/invoices", handler.FetchInvoices)
 	route.PATCH("/update/:id", handler.UpdateInvoiceStatus)
 	route.GET("/invoices/stats", handler.FetchInvoiceStats)
-	// route.POST("/login", middleware.ValidatorMiddleware[domain.LoginRequestDto], authsHandler.LoginUser)
+
 }
 
 func addAuthorization(

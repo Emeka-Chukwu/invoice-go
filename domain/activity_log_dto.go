@@ -20,3 +20,8 @@ type CreateActivityDTO struct {
 type IDParamPayload struct {
 	ID int `uri:"id" binding:"required"`
 }
+
+type IDCustomerParamPayload struct {
+	ID         int `uri:"id" binding:"required"`
+	CustomerID int `uri:"customer_id" binding:"required"`
+}

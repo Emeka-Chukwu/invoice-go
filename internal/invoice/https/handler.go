@@ -104,12 +104,14 @@ func NewInvoiceHandlers(usecase invoice_usecase.InvoiceUsecase, Worker worker.Ta
 }
 
 func (ch *invoiceHandler) DownloadInvoicePdf(ctx *gin.Context) {
-	resp, err := ch.usecase.GenerateInvoicePDF()
+	authPayload := security.GetAuthsPayload(ctx)
+	payload := util.GetUrlParams[domain.IDCustomerParamPayload](ctx)
+	status, resp, err := ch.usecase.DownloadSingleInvoice(payload.ID, payload.CustomerID, authPayload.UserId)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		ctx.JSON(status, gin.H{"error": err.Error()})
 		return
 	}
-	fileName := "account statement " + fmt.Sprintf("%d", time.Now().UnixNano()) + ".pdf"
+	fileName := "invoice-" + fmt.Sprintf("%d", time.Now().UnixNano()) + ".pdf"
 	ctx.Header("Content-Disposition", fmt.Sprintf("attachment; filename=%s", fileName))
 	ctx.Data(http.StatusOK, "application/pdf", resp)
 }

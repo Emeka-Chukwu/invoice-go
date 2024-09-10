@@ -38,6 +38,7 @@ CREATE TABLE invoices (
 CREATE TABLE invoice_items (
     id SERIAL PRIMARY KEY,
     invoice_id INT REFERENCES invoices(id),
+    title VARCHAR NOT NULL,
     description TEXT NOT NULL,
     quantity INT NOT NULL,
     unit_price float NOT NULL,

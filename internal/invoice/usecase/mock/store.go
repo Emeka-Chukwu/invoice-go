@@ -70,6 +70,22 @@ func (mr *MockInvoiceUsecaseMockRecorder) DeleteInvoiceItems(arg0 any) *gomock.C
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteInvoiceItems", reflect.TypeOf((*MockInvoiceUsecase)(nil).DeleteInvoiceItems), arg0)
 }
 
+// DownloadSingleInvoice mocks base method.
+func (m *MockInvoiceUsecase) DownloadSingleInvoice(arg0, arg1, arg2 int) (int, []byte, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DownloadSingleInvoice", arg0, arg1, arg2)
+	ret0, _ := ret[0].(int)
+	ret1, _ := ret[1].([]byte)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
+}
+
+// DownloadSingleInvoice indicates an expected call of DownloadSingleInvoice.
+func (mr *MockInvoiceUsecaseMockRecorder) DownloadSingleInvoice(arg0, arg1, arg2 any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DownloadSingleInvoice", reflect.TypeOf((*MockInvoiceUsecase)(nil).DownloadSingleInvoice), arg0, arg1, arg2)
+}
+
 // FetchInvoiceStats mocks base method.
 func (m *MockInvoiceUsecase) FetchInvoiceStats(arg0 int) (int, map[string]domain.InvoiceStats, error) {
 	m.ctrl.T.Helper()

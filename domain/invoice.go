@@ -29,6 +29,7 @@ type InvoiceItem struct {
 	ID          int       `json:"id"`
 	InvoiceID   int       `json:"invoice_id"`
 	Description string    `json:"description"`
+	Title       string    `json:"title"`
 	Quantity    int       `json:"quantity"`
 	UnitPrice   float64   `json:"unit_price"`
 	CreatedAt   time.Time `json:"created_at"`

@@ -1,11 +1,18 @@
 package invoice_usecase
 
 import (
+	"bytes"
 	"database/sql"
 	"errors"
+	"fmt"
 	"go-invoice/domain"
+	bankinfo_repository "go-invoice/internal/bank_info/repository"
+	customer_repository "go-invoice/internal/customer/repository"
+	"go-invoice/internal/invoice/helper"
 	invoice_repository "go-invoice/internal/invoice/repository"
 	"net/http"
+
+	"github.com/jung-kurt/gofpdf"
 )
 
 type InvoiceUsecase interface {
@@ -18,10 +25,13 @@ type InvoiceUsecase interface {
 	GetPagination(payload domain.PaginationDTO) domain.PaginationDTO
 	GenerateInvoicePDF() ([]byte, error)
 	UpdateInvoiceStatus(status string, id, userId int) (int, error)
+	DownloadSingleInvoice(id, customerId, userId int) (int, []byte, error)
 }
 
 type invoiceUsecase struct {
-	Repo invoice_repository.InvoiceRepository
+	Repo         invoice_repository.InvoiceRepository
+	RepoCustomer customer_repository.CustomerRepository
+	RepoBank     bankinfo_repository.BankInfoRepository
 }
 
 // GenerateInvoicePDF implements InvoiceUsecase.
@@ -121,4 +131,51 @@ func (i invoiceUsecase) UpdateInvoiceStatus(status string, id, userId int) (int,
 		return http.StatusInternalServerError, err
 	}
 	return http.StatusOK, nil
+}
+
+func (i invoiceUsecase) DownloadSingleInvoice(id, customerId, userId int) (int, []byte, error) {
+	invoiceResp, err := i.Repo.FetchInvoiceWithItems(id)
+	if err != nil {
+		return http.StatusInternalServerError, nil, err
+	}
+	customers, err := i.RepoCustomer.FetchCustomersByUserId(userId)
+	if err != nil {
+		return http.StatusInternalServerError, nil, err
+	}
+	var customer domain.CustomerResponse
+	if len(customers) == 0 {
+		return http.StatusInternalServerError, nil, errors.New("no customer selected")
+	}
+	customer = customers[0]
+	bankInfo, err := i.RepoBank.FetchBankInformation(int64(userId))
+	if err != nil {
+		return http.StatusInternalServerError, nil, err
+	}
+	pdf := gofpdf.New("P", "mm", "A4", "")
+	pdf.AddPage()
+
+	pdf.SetFillColor(252, 242, 244)
+	pdf.Rect(0, 0, 210, 297, "F")
+	pdf.SetFillColor(255, 255, 255)
+	pdf.RoundedRect(10, 10, 190, 277, 5, "F", "")
+	helper.AddSenderCustomerInfo(pdf, customer)
+	helper.AddInvoiceDetails(pdf, invoiceResp)
+	helper.AddItemsTable(pdf, invoiceResp.Items)
+	subTotal := 0.0
+	for _, item := range invoiceResp.Items {
+		subTotal += float64(item.UnitPrice) * float64(item.Quantity)
+	}
+	discountedAmount := subTotal * 0.01
+	totalAmount := subTotal - discountedAmount
+
+	helper.AddTotals(pdf, fmt.Sprintf("%f", subTotal), "DISCOUNT(1%)", fmt.Sprintf("%f", discountedAmount), fmt.Sprintf("%f", totalAmount))
+	helper.AddPaymentInfo(pdf, bankInfo)
+	helper.AddNote(pdf, "Thank you for your patronage")
+	var buf bytes.Buffer
+	err = pdf.Output(&buf)
+	if err != nil {
+		return http.StatusInternalServerError, nil, err
+	}
+	return http.StatusOK, buf.Bytes(), nil
+
 }
